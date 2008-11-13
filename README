@@ -1,70 +1,112 @@
-ActsAsTaggableOn
-================
+is_taggable
+===============================================================================
 
-This plugin was originally based on Acts as Taggable on Steroids by Jonathan Viney.
-It has evolved substantially since that point, but all credit goes to him for the
-initial tagging functionality that so many people have used.
+This plugin is almost entirely based on acts-as-taggable-on by Michael Bleigh +
+contributors.
 
-For instance, in a social network, a user might have tags that are called skills,
-interests, sports, and more. There is no real way to differentiate between tags and
-so an implementation of this type is not possible with acts as taggable on steroids.
+is_taggable supports the awesome contextual tagging of acts-as-taggable-on, but
+with a couple substantial changes to the underlying architecture.
 
-Enter Acts as Taggable On. Rather than tying functionality to a specific keyword
-(namely "tags"), acts as taggable on allows you to specify an arbitrary number of
-tag "contexts" that can be used locally or in combination in the same way steroids
-was used.
+Architecture Differences
+===============================================================================
+
+We had a couple key issues with the underlying architecture in 
+acts-as-taggable-on which we felt deserved a forking into a new direction.
+There are two main architectural differences between is_taggable and
+acts-as-taggable-on:
+
+1) is_taggable does *not* use a normalized data model -- there is one table
+"taggings" and not two tables "taggings" and "tags". This means that tags are
+duplicated in the taggings table. The reason behind this was that we could not
+find a reason justifying the join that couldn't be easily overcome with unique
+indexing and grouped selects.
+
+2) (This is the big one) -- is_taggable skips validations and callbacks on the
+Tagging model when saving. This totally breaks the normal AR behavior and the
+behavior used by all other AR tagging plugins. The reason for this is that the
+taggings are updated with a multi-insert -- which also means this plugin can 
+only be used on databases which support multi-insert (MySQL, Postgres, Oracle,
+...). The reason we use a multi-insert is because we ran into massive problems
+with large numbers of writes on taggings. Take this scenario:
+
+I upload a photo and fill in my tags when I upload it. I want people to find it
+so I tag it with about 20 different keywords. In order to save the tags on my
+photo the original plugin would have to (at least):
+
+2) do 20 SELECTs on the taggings table for validates_uniqueness_of
+4) do some number (at most 20) of INSERTs on the tags table to save the tags
+3) do 20 INSERTs on the taggings table to save the taggings
+
+So best case 20 INSERTs, 20 SELECTs -- worst case 40 INSERTs, 20 SELECTs.
+
+Now get a few users adding lots of tags on things concurrently and you can see
+writes quickly becoming a problem, and as the number of tags I'm adding grows,
+the problem gets worse. Individual INSERTs are fast, but once you have
+concurrency you have lock waits and the the problem gets massively compounded.
+
+By using a multi-insert, a non-normalized table, and a "manual" validation (do
+all the validates_uniqueness_of checks at once) we can get it down to:
+
+2) do 1 SELECT to check for duplicated taggings
+3) do 1 multi-INSERT to INSERT all the taggings
+
+Furthermore, no matter how many tags your inserting, it's always 1 SELECT and 1
+INSERT.
+
+Another thing to consider is the impact of updating tags. In the original 
+plugin this was done as a loop causing multiple DELETEs followed by multiple
+INSERTs. We've taken this down to 1 DELETE followed by 1 multi-INSERT.
+
+Compatibility
+===============================================================================
+
+is_taggable requires that your underlying database support multi-INSERT
+statements (i.e. INSERT INTO taggings (tag) VALUES ('foo', 'bar', 'baz')). Most
+"major" databases do -- including MySQL, PostgreSQL and Oracle.
+
+It has only been tested with Rails 2.1+ and makes use of named_scope (introduced
+in Rails 2.1).
 
 Installation
-============
+===============================================================================
+
+GemPlugin
+-------------------------------------------------------------------------------
+
+Rails 2.1+ introduces gem dependencies, to use them add this line to 
+environment.rb:
+  
+  config.gem "citrusbyte-is_taggable", :source => "http://gems.github.com", :lib => "is_taggable"
+  
+Then run "rake gems:install" to install the gem.
 
 Plugin
-------
+-------------------------------------------------------------------------------
 
-Acts As Taggable On is available both as a gem and as a traditional plugin. For the
-traditional plugin you can install like so (Rails 2.1 or later):
-
-  script/plugin install git://github.com/mbleigh/acts-as-taggable-on.git
+  script/plugin install git://github.com/citrusbyte/is_taggable.git
   
-For earlier versions:
+Gem
+-------------------------------------------------------------------------------
 
-  git clone git://github.com/mbleigh/acts-as-taggable-on.git vendor/plugins/acts-as-taggable-on
-  
-GemPlugin
----------
+  gem install citrusbyte-is_taggable --source http://gems.github.com
 
-Acts As Taggable On is also available as a gem plugin using Rails 2.1's gem dependencies.
-To install the gem, add this to your config/environment.rb:
-  
-  config.gem "mbleigh-acts-as-taggable-on", :source => "http://gems.github.com", :lib => "acts-as-taggable-on"
-  
-After that, you can run "rake gems:install" to install the gem if you don't already have it.
-See http://ryandaigle.com/articles/2008/4/1/what-s-new-in-edge-rails-gem-dependencies for
-additional details about gem dependencies in Rails.
-
-** NOTE **
-Some issues have been experienced with "rake gems:install". If that doesn't work to install the gem,
-try just installing it as a normal gem:
-
-  gem install mbleigh-acts-as-taggable-on --source http://gems.github.com
-
-Post Installation (Rails)
--------------------------
-1. script/generate acts_as_taggable_on_migration
+Post Installation
+-------------------------------------------------------------------------------
+1. script/generate is_taggable_migration
 2. rake db/migrate
 
 Testing
-=======
+===============================================================================
 
-Acts As Taggable On uses RSpec for its test coverage. If you already have RSpec on your
-application, the specs will run while using:
+is_taggable uses RSpec for its test coverage, if you're using RSpec type:
 
 rake spec:plugins
 
-Example
-=======
+Examples (all stolen from acts-as-taggable-on docs)
+===============================================================================
 
 class User < ActiveRecord::Base
-  acts_as_taggable_on :tags, :skills, :interests
+  is_taggable :tags, :skills, :interests
 end
 
 @user = User.new(:name => "Bobby")
@@ -91,12 +133,12 @@ User.skill_counts # => [<Tag name="joking" count=2>,<Tag name="clowning" count=1
 Finding Tagged Objects
 ======================
 
-Acts As Taggable On utilizes Rails 2.1's named_scope to create an association
+is_taggable utilizes Rails 2.1's named_scope to create an association
 for tags. This way you can mix and match to filter down your results, and it
 also improves compatibility with the will_paginate gem:
 
 class User < ActiveRecord::Base
-  acts_as_taggable_on :tags
+  is_taggable :tags
   named_scope :by_join_date, :order => "created_at DESC"
 end
 
@@ -144,11 +186,11 @@ Tag Ownership
 Tags can have owners:
 
 class User < ActiveRecord::Base
-  acts_as_tagger
+  is_tagger
 end
 
 class Photo < ActiveRecord::Base
-  acts_as_taggable_on :locations
+  is_taggable :locations
 end
 
 @some_user.tag(@some_photo, :with => "paris, normandy", :on => :locations)
@@ -156,23 +198,31 @@ end
 @some_user.owned_tags
 @some_photo.locations_from(@some_user)
 
-Caveats, Uncharted Waters
-=========================
+Caveats
+===============================================================================
 
-This plugin is still under active development. Tag caching has not 
-been thoroughly (or even casually) tested and may not work as expected.
+1) Your underlying database *must* support multi-INSERT
+2) You probably need Rails 2.1+, but seriously named_scope is so cool you need
+   it anyways.
+3) You cannot use callbacks/validations on the Tagging model (you can still use
+   them like normal on your Taggables and Taggers...)
 
 Contributors
-============
+===============================================================================
 
+is_taggable:
+* Ben Alavi & Michel Martens - Ruthless hackers of acts-as-taggable-on
+
+acts-as-taggable-on:
 * Michael Bleigh - Original Author
 * Brendan Lim - Related Objects
 * Pradeep Elankumaran - Taggers
 * Sinclair Bain - Patch King
 
 Patch Contributors
-------------------
+-------------------------------------------------------------------------------
 
+acts-as-taggable-on:
 * tristanzdunn - Related objects of other classes
 * azabaj - Fixed migrate down
 * Peter Cooper - named_scope fix
@@ -181,10 +231,13 @@ Patch Contributors
 * lawrencepit - cached tag work
 
 Resources
-=========
+===============================================================================
 
-* Acts As Community - http://www.actsascommunity.com/projects/acts-as-taggable-on
-* GitHub - http://github.com/mbleigh/acts-as-taggable-on
-* Lighthouse - http://mbleigh.lighthouseapp.com/projects/10116-acts-as-taggable-on
+* GitHub     - http://github.com/citrusbyte/is_taggable
+* Lighthouse - http://citrusbyte.lighthouseapp.com/projects/
 
+is_taggable:
+Copyright (c) 2008 Citrusbyte, LLC, released under the MIT license
+
+acts-as-taggable-on:
 Copyright (c) 2007 Michael Bleigh (http://mbleigh.com/) and Intridea Inc. (http://intridea.com/), released under the MIT license

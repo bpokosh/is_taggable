@@ -1,3 +1,11 @@
+is_taggable:
+
+== 2008-something-something
+
+* Forked and totally changed
+
+acts-as-taggable-on:
+
 == 2008-07-17
 
 * Can now use a named_scope to find tags!
