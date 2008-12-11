@@ -1,5 +1,9 @@
 is_taggable:
 
+== 2008-12-11
+
+* Added support for Rails 2.2.2 (new Multibyte::Chars handling for tag normalization)
+
 == 2008-something-something
 
 * Forked and totally changed
