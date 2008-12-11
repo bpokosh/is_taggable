@@ -17,8 +17,8 @@ class String
   
       translation_hash = {}
       accented_chars.each_with_index { |char, idx| translation_hash[char[0]] = unaccented_chars[idx] }
-      translation_hash["Æ".chars[0]] = 'AE'
-      translation_hash["æ".chars[0]] = 'ae'
+      translation_hash["Æ".mb_chars[0]] = 'AE'
+      translation_hash["æ".mb_chars[0]] = 'ae'
       translation_hash
     end
 end
