@@ -2,8 +2,8 @@
 class String
   class << self
     def unpack(string)
-      return ActiveSupport::Multibyte::Chars.g_unpack(string).collect{ |c| c[0] } if defined?(ActiveSupport::Multibyte::Chars)
-      string.chars.collect{ |c| c[0] }
+      return ActiveSupport::Multibyte::Chars.g_unpack(string).collect{ |c| c[0] } if ActiveSupport::Multibyte::Chars.respond_to?(:g_unpack)
+      string.split('').collect{ |c| c.chars[0] }
     end
   end
   
