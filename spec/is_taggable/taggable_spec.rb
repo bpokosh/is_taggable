@@ -10,7 +10,7 @@ describe "Taggable" do
     @taggable.skill_list = "ruby, rails, css"
     @taggable.instance_variable_get("@skill_list").instance_of?(TagList).should be_true
     @taggable.save
-    
+
     Tagging.find(:all).size.should == 3
   end
   

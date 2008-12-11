@@ -59,5 +59,9 @@ describe TagList do
     it "should strip 'special' characters" do
       normalized_tags('c%!#{*!@\&oo!@l}, #*!#**)#(!@#)bea<>><>}{}:":":ns').should eql('cool, beans')
     end
+    
+    it "should replace ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝàáâãäåçèéêëìíîïñòóôõöøùúûüýÆæ" do
+      normalized_tags('ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝàáâãäåçèéêëìíîïñòóôõöøùúûüýÆæ').should eql('aaaaaaceeeeiiiidnoooooxouuuuyaaaaaaceeeeiiiinoooooouuuuyaeae')
+    end
   end
 end

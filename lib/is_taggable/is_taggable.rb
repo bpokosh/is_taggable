@@ -302,7 +302,7 @@ module ActiveRecord
             all_taggings[tagging.context] ||= []
             all_taggings[tagging.context] << tagging
           end
-          
+
           (custom_contexts + self.class.tag_types.map(&:to_s)).each do |tag_type|
             next unless contextual_tag_list = instance_variable_get("@#{tag_type.singularize}_list")
             normalized_tag_list = contextual_tag_list.normalized
