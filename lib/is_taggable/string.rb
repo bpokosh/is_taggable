@@ -3,7 +3,7 @@ class String
   def to_ascii
     # split in muti-byte aware fashion and translate characters over 127
     # and dropping characters not in the translation hash
-    self.chars.split('').collect { |c| (c[0] <= 127) ? c : translation_hash[c[0]] }.join
+    self.mb_chars.split('').collect { |c| (c[0] <= 127) ? c : translation_hash[c[0]] }.join
   end
     
   protected
@@ -12,7 +12,7 @@ class String
     end
     
     def setup_translation_hash
-      accented_chars   = "ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝàáâãäåçèéêëìíîïñòóôõöøùúûüý".chars.split('')
+      accented_chars   = "ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝàáâãäåçèéêëìíîïñòóôõöøùúûüý".mb_chars.split('')
       unaccented_chars = "AAAAAACEEEEIIIIDNOOOOOxOUUUUYaaaaaaceeeeiiiinoooooouuuuy".split('')
   
       translation_hash = {}

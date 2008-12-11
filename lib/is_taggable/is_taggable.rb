@@ -131,7 +131,6 @@ module ActiveRecord
 
           conditions = []
           conditions << sanitize_sql(options.delete(:conditions)) if options[:conditions]
-
           unless (on = options.delete(:on)).nil?
             conditions << sanitize_sql(["context = ?",on.to_s])
           end
@@ -142,10 +141,7 @@ module ActiveRecord
             conditions << sanitize_sql(["#{table_name}.id NOT IN (SELECT #{Tagging.table_name}.taggable_id FROM #{Tagging.table_name} WHERE (#{Tagging.table_name}.normalized IN(?)) AND #{Tagging.table_name}.taggable_type = #{quote_value(base_class.name)})", tags.normalized])
           else
             conditions << sanitize_sql(["#{taggings_alias}.normalized IN(?)", tags.normalized])
-
-            if options.delete(:match_all)
-              group = "#{taggings_alias}.taggable_id HAVING COUNT(#{taggings_alias}.taggable_id) = #{taggings.size}"
-            end
+            group = "#{taggings_alias}.taggable_id HAVING COUNT(#{taggings_alias}.taggable_id) = #{taggings.size}" if options.delete(:match_all)
           end
 
           { :select     => "DISTINCT #{table_name}.*",
@@ -328,7 +324,7 @@ module ActiveRecord
           true
         end
 
-        def sanitize_sql attrs
+        def sanitize_sql(attrs)
           ActiveRecord::Base.send(:sanitize_sql, attrs)
         end
 

@@ -30,4 +30,13 @@ describe Tagging do
     @tagging.tag = 'foo'
     lambda { @tagging.save }.should raise_error
   end
+  
+  it "should raise on create" do
+    lambda { Tagging.create :tag => 'foo' }.should raise_error
+  end
+  
+  it "should raise on update" do
+    @taggable = TaggableModel.create!(:name => "Bob Jones", :tag_list => 'bar')
+    lambda { @taggable.reload.taggings.first.update_attributes(:tag => 'foo') }.should raise_error
+  end
 end
