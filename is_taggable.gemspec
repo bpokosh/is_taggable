@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "is_taggable"
-  s.version = "0.85"
+  s.version = "0.87"
   s.date = "2008-12-11"
   s.summary = "Tagging for ActiveRecord with custom contexts, advanced features, and optimizations."
   s.email = "ben.alavi@citrusbyte.com"
@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "lib/is_taggable/tag_list.rb",
     "lib/is_taggable/tagging.rb",
     "lib/is_taggable/tags_helper.rb",
+    "lib/is_taggable/string.rb"
     "rails/init.rb",
     "spec/is_taggable",
     "spec/is_taggable/is_taggable_spec.rb",
