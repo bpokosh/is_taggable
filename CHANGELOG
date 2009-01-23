@@ -1,5 +1,9 @@
 is_taggable:
 
+== 2008-01-22
+
+* Fixed gem building problem, gem should build now
+
 == 2008-12-11
 
 * Added support for Rails 2.2.2 (new Multibyte::Chars handling for tag normalization)
@@ -10,7 +14,7 @@ is_taggable:
 
 == 2009-01-05
 
-* Updated broken gemspec
+* Updated broken gemspec (thanks, mixr)
 
 acts-as-taggable-on:
 

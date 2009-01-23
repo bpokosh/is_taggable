@@ -8,33 +8,32 @@ Gem::Specification.new do |s|
   s.description = "is_taggable supports pretty much everything as the origin acts-as-taggable-on but is highly optimized to eliminate write blocking problems."
   s.has_rdoc = false
   s.authors = %w( Ben\ Alavi Michel\ Martens )
-  s.files = [ 
-    "CHANGELOG",
-    "MIT-LICENSE",
-    "README",
-    "generators/is_taggable_migration",
-    "generators/is_taggable_migration/is_taggable_migration_generator.rb",
-    "generators/is_taggable_migration/templates",
-    "generators/is_taggable_migration/templates/add_users_migration.rb",
-    "generators/is_taggable_migration/templates/migration.rb",
-    "init.rb",
-    "lib/is_taggable.rb",
-    "lib/is_taggable/is_taggable.rb",
-    "lib/is_taggable/is_tagger.rb",
-    "lib/is_taggable/tag_list.rb",
-    "lib/is_taggable/tagging.rb",
-    "lib/is_taggable/tags_helper.rb",
-    "lib/is_taggable/string.rb"
-    "rails/init.rb",
-    "spec/is_taggable",
-    "spec/is_taggable/is_taggable_spec.rb",
-    "spec/is_taggable/tag_list_spec.rb",
-    "spec/is_taggable/taggable_spec.rb",
-    "spec/is_taggable/tagger_spec.rb",
-    "spec/is_taggable/tagging_spec.rb",
-    "spec/debug.log",
-    "spec/schema.rb",
-    "spec/spec_helper.rb",
-    "uninstall.rb" 
-  ]
+  s.files = %w(
+    CHANGELOG
+    MIT-LICENSE
+    README
+    generators/is_taggable_migration
+    generators/is_taggable_migration/is_taggable_migration_generator.rb 
+    generators/is_taggable_migration/templates 
+    generators/is_taggable_migration/templates/migration.rb 
+    init.rb 
+    lib/is_taggable.rb 
+    lib/is_taggable/is_taggable.rb 
+    lib/is_taggable/is_tagger.rb 
+    lib/is_taggable/tag_list.rb 
+    lib/is_taggable/tagging.rb 
+    lib/is_taggable/tags_helper.rb 
+    lib/is_taggable/string.rb
+    rails/init.rb 
+    spec/is_taggable 
+    spec/is_taggable/is_taggable_spec.rb 
+    spec/is_taggable/tag_list_spec.rb 
+    spec/is_taggable/taggable_spec.rb 
+    spec/is_taggable/tagger_spec.rb 
+    spec/is_taggable/tagging_spec.rb 
+    spec/debug.log 
+    spec/schema.rb 
+    spec/spec_helper.rb 
+    uninstall.rb
+  )
 end
