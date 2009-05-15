@@ -1,5 +1,9 @@
 is_taggable:
 
+== 2009-05-15
+
+* Added ability to disable multiple inserts for unsupported databases (thx djanowski)
+
 == 2008-01-22
 
 * Fixed gem building problem, gem should build now

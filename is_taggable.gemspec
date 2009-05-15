@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "is_taggable"
-  s.version = "0.87"
+  s.version = "0.88"
   s.date = "2008-12-11"
   s.summary = "Tagging for ActiveRecord with custom contexts, advanced features, and optimizations."
   s.email = "ben.alavi@citrusbyte.com"
