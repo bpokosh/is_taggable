@@ -4,6 +4,8 @@ module ActiveRecord
       def self.included(base)
         base.extend(ClassMethods)
       end
+      
+      mattr_accessor :use_multiple_inserts
 
       module ClassMethods
         def taggable?
@@ -274,11 +276,10 @@ module ActiveRecord
 
         def related_search_options(context, klass, options = {})
           tags_to_find = self.taggings_on(context).collect(&:normalized)
-
           { :select     => "#{klass.table_name}.*, related_ids.count AS count",
             :from       => "#{klass.table_name}",
             :joins      => sanitize_sql(["INNER JOIN(
-              SELECT #{klass.table_name}.id, COUNT(#{Tagging.table_name}.id) AS count
+              SELECT #{klass.table_name}.id AS id, COUNT(#{Tagging.table_name}.id) AS count
                 FROM #{klass.table_name}, #{Tagging.table_name}
                WHERE #{klass.table_name}.id = #{Tagging.table_name}.taggable_id AND #{Tagging.table_name}.taggable_type = '#{klass.to_s}'
                  AND #{Tagging.table_name}.context = '#{context}' AND #{Tagging.table_name}.normalized IN (?)
@@ -315,8 +316,15 @@ module ActiveRecord
               self.taggings.delete(*old_tags) if old_tags.any?
               if new_tag_names.any? # it's possible we're just removing existing tags
                 sql  = "INSERT INTO taggings (tag, normalized, context, taggable_id, taggable_type, tagger_id, tagger_type, created_at) VALUES "
-                sql += new_tag_names.collect { |tag| tag_insert_value(tag, tag_type, self, owner) }.join(", ")
-                ActiveRecord::Base.connection.execute(sql)
+
+                if use_multiple_inserts
+                  sql += new_tag_names.collect { |tag| tag_insert_value(tag, tag_type, self, owner) }.join(", ")
+                  ActiveRecord::Base.connection.execute(sql)
+                else
+                  new_tag_names.each do |tag|
+                    ActiveRecord::Base.connection.execute(sql + tag_insert_value(tag, tag_type, self, owner))
+                  end
+                end
               end
             end
           end

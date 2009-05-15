@@ -1,7 +1,22 @@
-require File.dirname(__FILE__) + '/../../../../spec/spec_helper'
-# hack the require with absolute path like this for now...
-# require '/Users/benalavi/Sites/causecast/spec/spec_helper'
-# require '/Users/michel/CitrusByte/causecast/spec/spec_helper'
+require "rubygems"
+require "spec"
+
+gem "activerecord"
+require "active_record"
+
+RAILS_DEFAULT_LOGGER = Logger.new($stdout)
+
+adapter = ENV['ADAPTER'] || "sqlite3"
+
+ActiveRecord::Base.establish_connection({:adapter => adapter}.merge(YAML.load_file(File.dirname(__FILE__) + "/database.yml")[adapter]))
+
+require File.dirname(__FILE__) + "/../rails/init"
+
+puts "Testing with #{adapter}..."
+
+if adapter == "sqlite3"
+  ActiveRecord::Is::Taggable.use_multiple_inserts = false
+end
 
 module Spec::Example::ExampleGroupMethods
   alias :context :describe
