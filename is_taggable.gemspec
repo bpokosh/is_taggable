@@ -31,7 +31,6 @@ Gem::Specification.new do |s|
     spec/is_taggable/taggable_spec.rb 
     spec/is_taggable/tagger_spec.rb 
     spec/is_taggable/tagging_spec.rb 
-    spec/debug.log 
     spec/schema.rb 
     spec/spec_helper.rb 
     uninstall.rb
